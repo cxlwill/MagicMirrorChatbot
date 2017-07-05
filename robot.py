@@ -3,6 +3,7 @@ import urllib
 import json
 import sys
 import urllib2
+import json
 import uuid
 import base64
 import os
@@ -10,7 +11,7 @@ import time
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-#百度语音access_token获取
+#获取百度token
 appid=7647466
 apikey="urSY5fP22GsR1ARF4oFmzyTv"
 secretkey="44102aef059a899a429d9e92556d1b96"
@@ -18,15 +19,14 @@ baidu_url="https://openapi.baidu.com/oauth/2.0/token?grant_type=client_credentia
 y_post=urllib2.urlopen(baidu_url)
 y_read=y_post.read()
 y_token=json.loads(y_read)['access_token']
-
-#录音
+#print y_read
+#print y_token
+# 语音识别
 def luyin():
         print '开始录音'
         os.system('arecord  -D plughw:1,0 -c 1 -d 4  1.wav -r 8000 -f S16_LE 2>/dev/null')
-
-#语音识别
-def shibie():
-        mac_address="haogeoyes"
+def asr():
+        mac_address="cxlwill"
         with open("1.wav",'rb') as f:
             s_file = f.read()
 
@@ -47,45 +47,46 @@ def shibie():
         else:
                 out_txt="Null"
         return out_txt
-
+# 语音合成
 def getHtml(url):
     page = urllib.urlopen(url)
     html = page.read()
     return html
 
-#语音合成
 def hecheng(text):
-        geturl="http://tsn.baidu.com/text2audio?tex="+ text+"&lan=zh&per=3&pit=9&spd=5&cuid=CCyo6UGf16ggKZGwGpQYL9Gx&ctp=1&tok="+y_token
-        return os.system('mpg123 "%s"'%(geturl))
-
-#聊天循环
-if __name__ == '__main__':
+    geturl="http://tsn.baidu.com/text2audio?tex="+ text+"&lan=zh&per=3&pit=9&spd=5&cuid=CCyo6UGf16ggKZGwGpQYL9Gx&ctp=1&tok="+y_token
+    return os.system('mpg123 "%s"'%(geturl))
+# 图灵机器人
+def tuling(info):
     key = 'cb5824964a874ecbb62313892b2fe056'
     api = 'http://www.tuling123.com/openapi/api?key=' + key + '&userid=master&loc=福建省厦门市&info='
+    request = api + info
+    response = getHtml(request)
+    dic_json = json.loads(response)
+    text = dic_json['text']
+    return text
+
+if __name__ == '__main__':
     while True:
         luyin()
-        out=shibie().encode("utf-8")
+        out=asr().encode("utf-8")
         if out == '魔镜魔镜，'.encode("utf-8"):
                 print '开始聊天'
                 text = '主人好'
                 hecheng(text)
                 time.sleep(1)
                 luyin()
-                out=shibie().encode("utf-8")
+                out=asr().encode("utf-8")
                 while out != 'Null' :
                         print '我:'.decode('utf-8') + out
-                        info = out
-                        request = api + info
-                        response = getHtml(request)
-                        dic_json = json.loads(response)
-                        text = dic_json['text']
-                        print '魔镜: '.decode('utf-8') + dic_json['text']
+                        text = tuling(out)
+                        print '魔镜: '.decode('utf-8') + text
                         hecheng(text)
                         time.sleep(1)
                         luyin()
-                        out=shibie().encode("utf-8")
+                        out=asr().encode("utf-8")
         else:
                 print '我:'.decode('utf-8') + out
                 print '聊天结束'
-
+        
 
