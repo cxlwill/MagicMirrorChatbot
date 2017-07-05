@@ -11,7 +11,7 @@ import time
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-#获取百度token
+#百度token
 appid=7647466
 apikey="urSY5fP22GsR1ARF4oFmzyTv"
 secretkey="44102aef059a899a429d9e92556d1b96"
@@ -19,8 +19,7 @@ baidu_url="https://openapi.baidu.com/oauth/2.0/token?grant_type=client_credentia
 y_post=urllib2.urlopen(baidu_url)
 y_read=y_post.read()
 y_token=json.loads(y_read)['access_token']
-#print y_read
-#print y_token
+
 # 语音识别
 def luyin():
         print '开始录音'
@@ -46,7 +45,7 @@ def asr():
                 out_txt=json_resp['result'][0]
         else:
                 out_txt="Null"
-        return out_txt
+        return out_txt.encode("utf-8")
 # 语音合成
 def getHtml(url):
     page = urllib.urlopen(url)
@@ -69,14 +68,14 @@ def tuling(info):
 if __name__ == '__main__':
     while True:
         luyin()
-        out=asr().encode("utf-8")
+        out=asr()
         if out == '魔镜魔镜，'.encode("utf-8"):
                 print '开始聊天'
                 text = '主人好'
                 hecheng(text)
                 time.sleep(1)
                 luyin()
-                out=asr().encode("utf-8")
+                out=asr()
                 while out != 'Null' :
                         print '我:'.decode('utf-8') + out
                         text = tuling(out)
@@ -84,7 +83,7 @@ if __name__ == '__main__':
                         hecheng(text)
                         time.sleep(1)
                         luyin()
-                        out=asr().encode("utf-8")
+                        out=asr()
         else:
                 print '我:'.decode('utf-8') + out
                 print '聊天结束'
